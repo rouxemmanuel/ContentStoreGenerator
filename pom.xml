@@ -13,7 +13,7 @@
 			<version>2.5</version>
 		</dependency>
 
-		<!-- Databases driver -->
+		<!-- Databases drivers -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
@@ -26,8 +26,13 @@
 		</dependency>
 		<dependency>
 			<groupId>com.oracle</groupId>
-			<artifactId>ojdbc14</artifactId>
-			<version>10.2.0.5.0</version>
+			<artifactId>ojdbc7</artifactId>
+			<version>12.1.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>sqljdbc4</artifactId>
+			<version>1.0</version>
 		</dependency>
 	</dependencies>
 

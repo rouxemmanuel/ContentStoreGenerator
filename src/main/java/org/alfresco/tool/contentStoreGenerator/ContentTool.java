@@ -17,14 +17,14 @@ public class ContentTool {
 	
 	private static String operation = "check";
     private static String alfPropertiesFileName = "";
-    private static String dbType = "mysql";
+    private static String dbType = "postgresql";
     private static String dbUser = "alfresco";
     private static String dbPass = "alfresco";
     private static String dbHost = "localhost";
     private static String dbPort = null;
     private static String dbSchema = "alfresco";
     private static String dbUrl = "";
-    private static String dbDriver = "org.gjt.mm.mysql.Driver";
+    private static String dbDriver = "org.postgresql.Driver";
     private static String DEBUG = "PART";
     private static String alfData = "./alf_data";
     private static String contentStoreName = "contentstore";
@@ -88,8 +88,8 @@ public class ContentTool {
                     if(args[i].toLowerCase().equals("-d")) {
                         i++;
                         dbType = args[i].toLowerCase();
-                        if(!dbType.equals("mysql") && !dbType.equals("oracle") && !dbType.equals("postgresql")) {
-                            System.out.println("Only mysql, oracle and postgresql are supported at the moment - sorry.");
+                        if(!dbType.equals("mysql") && !dbType.equals("oracle") && !dbType.equals("postgresql") && !dbType.equals("sqlserver")) {
+                            System.out.println("Only mysql, oracle, sqlserver and postgresql are supported at the moment.");
                             usage();
                         }
                     } else if(args[i].toLowerCase().equals("-h")) {
@@ -177,8 +177,18 @@ public class ContentTool {
                 	dbPort = "5432";
                 }
             	dbSchema = dbUrl.toLowerCase().split("/")[3];
-            } else {
-                System.out.println("Only mysql, oracle and postgresql are supported at the moment...");
+            } else if(dbType.equals("sqlserver")) {
+            	dbHost = dbUrl.toLowerCase().split("/")[2];
+                if (dbHost.indexOf(":") != -1) {
+                	dbHost = dbHost.toLowerCase().split(":")[0];
+                	dbPort = dbHost.toLowerCase().split(":")[1];
+                }
+                if (dbPort == null) {
+                	dbPort = "1433";
+                }
+            	dbSchema = dbUrl.toLowerCase().split("/")[3];
+            }  else {
+                System.out.println("Only mysql, oracle, sqlserver and postgresql are supported at the moment.");
                 System.exit(0);
             }
         }
@@ -208,12 +218,17 @@ public class ContentTool {
         System.out.println(" <operation>                - Whether to check the existing ContentStore, or fill a new one - default: check ");
         System.out.println("-f <properties_filename>    - the properties file which holds the relevant information ");
         System.out.println("");
-        System.out.println("-d <db_type>                - currently only mysql, oracle and postgresql are supported   - default:mysql");
+        System.out.println("-d <db_type>                - currently only mysql, oracle, sqlserver and postgresql are supported   - default:postgresql");
         System.out.println("-h <db_hostname>            - Where the DB is                     - default:localhost");
         System.out.println("-port <db_port>             ");
         System.out.println("-s <db_schema>              - default:alfresco");
         System.out.println("-u <db_user>                - default:alfresco");
         System.out.println("-p <db_pass>                - default:alfresco");
+        System.out.println("-dbd <db_driver>            - database driver");
+        System.out.println("                              org.gjt.mm.mysql.Driver for mysql");
+        System.out.println("                              oracle.jdbc.OracleDriver for oracle");
+        System.out.println("                              org.postgresql.Driver for postgresql (default)");
+        System.out.println("                              com.microsoft.sqlserver.jdbc.SQLServerDriver for sqlserver");
         System.out.println("");
         System.out.println("-a <alf_data_directory>     - Directory underneath which the contentstore directory will be");
         System.out.println("                               The does not have to exist yet.");
@@ -306,6 +321,9 @@ public class ContentTool {
                 }
                 if(dbType.equals("postgresql")) {
                     dbUrl = (new StringBuilder("jdbc:postgresql://")).append(dbHost).append(":").append(dbPort).append("/").append(dbSchema).toString();
+                }
+                if(dbType.equals("sqlserver")) {
+                    dbUrl = (new StringBuilder("jdbc:jtds:sqlserver://")).append(dbHost).append(":").append(dbPort).append("/").append(dbSchema).toString();
                 }
             }
             con = DriverManager.getConnection(dbUrl, dbUser, dbPass);
